@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>TVM Tool</title>
+
+    <!-- bootstrap 5.x or 4.x is supported. You can also use the bootstrap css 3.3.x versions -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" crossorigin="anonymous">
+ 
+    <!-- default icons used in the plugin are from Bootstrap 5.x icon library (which can be enabled by loading CSS below) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.min.css" crossorigin="anonymous">
+    
+    <!-- the fileinput plugin styling CSS file -->
+    <link href="https://cdn.jsdelivr.net/gh/kartik-v/bootstrap-fileinput@5.2.5/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css" />
+    
+    <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+    <script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+    <!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script> -->
+    
+    <!-- the main fileinput plugin script JS file -->
+    <script src="https://cdn.jsdelivr.net/gh/kartik-v/bootstrap-fileinput@5.2.5/js/fileinput.min.js"></script>
+  </head>
+  <body>
+    <label for="input-folder">Select files/folders</label>
+    <div class="file-loading">
+        {% csrf_token %}
+        <input id="input-folder" name="input-folder" type="file" multiple>
+    </div>
+    <button id="btn">Start service</button>
+    <script>
+    $(document).ready(function() {
+        $("#input-folder").fileinput({
+            language: 'zh',
+            uploadUrl: "upload/",
+            browseLabel: '选择文件夹',
+            hideThumbnailContent: true, // hide image, pdf, text or other content in the thumbnail preview
+            uploadExtraData: function () {  // uploadExtraData携带附加参数，上传时携带csrftoken
+              return {csrfmiddlewaretoken: $.cookie('csrftoken'), doc_uuid: $('[name=doc_uuid]').val()}
+            }
+        });
+    });
+    $("#btn").click(function() {
+        var token = '{{ csrf_token }}'
+        $.ajax({
+          url: 'build/',
+          type: 'post',
+          headers: {"X-CSRFToken": `${token}`},//添加token头
+          data: "start build", //JSON.stringify({'modelname': }),
+          dataType: "json",
+          processData: false,
+          contentType: false,
+          success: function (data) {
+            console.log(data)
+          },
+          error: function () {
+          }
+        })
+    });
+    </script>
+  </body>
+</html>
